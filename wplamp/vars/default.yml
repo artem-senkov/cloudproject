@@ -1,0 +1,15 @@
+---
+#System Settings
+php_modules: [ 'php-curl', 'php-gd', 'php-mbstring', 'php-xml', 'php-xmlrpc', 'php-soap', 'php-intl', 'php-zip' ]
+
+#MySQL Settings
+mysql_root_password: "Japan2013"
+mysql_db: "wordpressDB1"
+mysql_user: "artem"
+mysql_password: "Japan2013"
+
+#HTTP Settings
+http_host: "itadmin.spb.ru"
+http_conf: "itadmin.spb.ru.conf"
+http_port: "80"
+ssh_port: "22"

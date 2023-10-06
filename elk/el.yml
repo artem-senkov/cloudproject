@@ -1,0 +1,12 @@
+---
+#
+# Playbook to install the ELK stack + Beats
+#
+- hosts: elk1
+  become: yes
+  become_user: root
+  roles:
+#  - { role: java }
+  - { role: elasticsearch7 }
+  - { role: filebeat-web7 }
+

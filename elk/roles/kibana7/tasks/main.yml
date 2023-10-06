@@ -1,0 +1,40 @@
+---
+#
+# Installing Kibana
+#
+
+- name: install kibana 7 from a .deb on the internet
+  apt:
+    deb: https://mirrors.cloud.tencent.com/elasticstack/apt/7.x/pool/main/k/kibana/kibana-7.17.13-amd64.deb
+    state: present
+  become: true
+  register: apt_output
+
+# Configurations
+
+- name: Updating the config file to allow outside access
+  lineinfile:
+   destfile: /etc/kibana/kibana.yml
+   regexp: 'server.host:'
+   line: 'server.host: 0.0.0.0'
+
+- name: Defining server port
+  lineinfile:
+   destfile: /etc/kibana/kibana.yml
+   regexp: 'server.port:'
+   line: 'server.port: 5601'
+    
+- name: Defining Elasticsearch URL
+  lineinfile:
+   destfile: /etc/kibana/kibana.yml
+   regexp: 'elasticsearch.hosts:'
+   line: 'elasticsearch.hosts: ["http://{{ elkserver_ip }}:9200"]'
+
+# Starting Kibana
+
+- name: Starting kibana
+  service:
+   name: kibana
+   state: started
+   enabled: true
+   daemon-reload: yes

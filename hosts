@@ -1,0 +1,15 @@
+[webservers]
+ws1 ansible_ssh_host=158.160.110.182
+ws2 ansible_ssh_host=158.160.79.117
+
+[elk]
+elk1 ansible_ssh_host=158.160.116.86
+kib1 ansible_ssh_host=158.160.124.98
+
+[other]
+zab1 ansible_ssh_host=158.160.97.122
+bast1  ansible_ssh_host=158.160.125.178
+
+[all:vars]
+ansible_ssh_private_key_file=~/.ssh/mysshkey
+ansible_user=artem

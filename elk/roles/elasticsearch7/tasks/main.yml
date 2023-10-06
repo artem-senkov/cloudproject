@@ -1,0 +1,69 @@
+---
+#
+# Installing Elasticsearch
+#
+
+- name: install elasticsearch 7 from a .deb on the internet
+  apt:
+    deb: https://mirrors.cloud.tencent.com/elasticstack/apt/7.x/pool/main/e/elasticsearch/elasticsearch-7.17.13-amd64.deb
+    state: present
+  become: true
+  register: apt_output
+   
+# Update Elasticsearch config file to allow access (to secure Elasticsearch, bind to 'localhost'). 
+
+- name: Updating the config file to allow outside access
+  lineinfile:
+   destfile: /etc/elasticsearch/elasticsearch.yml
+   regexp: 'network.host:'
+   line: 'network.host: 0.0.0.0'
+
+# Update Elasticsearch config file node.name:
+
+- name: Updating the config file  node.name:
+  lineinfile:
+   destfile: /etc/elasticsearch/elasticsearch.yml
+   regexp: 'node.name:'
+   line: 'node.name: elk1'
+# Update Elasticsearch config file discovery.seed_hosts
+
+- name: Updating the config file discovery.seed_hosts
+  lineinfile:
+   destfile: /etc/elasticsearch/elasticsearch.yml
+   regexp: 'discovery.seed_hosts:'
+   line: 'discovery.seed_hosts: ["127.0.0.1", "[::1]"]'
+
+# Update Elasticsearch config file cluster.name:  
+
+- name: Updating the config file cluster.name:
+  lineinfile:
+   destfile: /etc/elasticsearch/elasticsearch.yml
+   regexp: 'cluster.name:'
+   line: 'cluster.name: elk-cluster1'
+
+# Update Elasticsearch config file cluster.initial_master_nodes: 
+
+- name: Updating the config file discovery.seed_hosts
+  lineinfile:
+   destfile: /etc/elasticsearch/elasticsearch.yml
+   regexp: 'cluster.initial_master_nodes:'
+   line: 'cluster.initial_master_nodes: ["elk1"]'
+
+
+ 
+# Update Elasticsearch port in config file 
+
+- name: Updating the port in config file 
+  lineinfile:
+   destfile: /etc/elasticsearch/elasticsearch.yml
+   regexp: 'http.port:'
+   line: 'http.port: 9200'
+ 
+
+# Enable and Start Elasticsearch
+- name: Starting Elasticsearch
+  service:
+   name: elasticsearch
+   state: started
+   enabled: true
+   daemon-reload: yes

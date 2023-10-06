@@ -1,0 +1,31 @@
+---
+#
+# Installing Filebeat
+#
+
+- name: Import a key for alternative repository
+  ansible.builtin.apt_key:
+    state: present
+    url: http://elasticrepo.serveradmin.ru/elastic.asc
+
+- name: Add alternative repository
+  ansible.builtin.apt_repository:
+    repo: deb http://elasticrepo.serveradmin.ru bullseye main
+    state: present
+    filename: elasticrepo
+
+# Install Filebeat 
+
+- name: Install Filebeat with apt
+  apt:
+   name: filebeat
+   update_cache: yes
+
+# Enabling Filebeat
+
+- name: Starting Elasticsearch
+  service:
+   name: filebeat
+   state: started
+   enabled: true
+   daemon-reload: yes

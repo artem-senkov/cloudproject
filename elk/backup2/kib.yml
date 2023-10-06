@@ -1,0 +1,10 @@
+---
+#
+# Playbook to install the kibana
+#
+- hosts: kib1
+  become: yes
+  become_user: root
+  roles:
+  - { role: kibana }
+

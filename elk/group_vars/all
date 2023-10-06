@@ -1,0 +1,4 @@
+---
+# servers IP
+kibanaserver_ip: 158.160.124.155
+elkserver_ip: 158.160.47.154

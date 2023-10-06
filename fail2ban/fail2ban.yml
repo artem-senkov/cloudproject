@@ -1,0 +1,11 @@
+---
+#
+# Playbook to install fail2ban
+#
+- hosts: webservers, bast1
+  become: yes
+  become_user: root
+  roles:
+  - { role: ufw }
+  - { role: fail2ban }
+

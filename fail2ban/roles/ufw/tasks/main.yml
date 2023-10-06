@@ -1,0 +1,16 @@
+---
+  # UFW Configurat
+
+- name: Install UFW firewall
+  apt: name=ufw update_cache=yes state=latest
+
+- name: Enable UFW
+  community.general.ufw:
+    state: enabled
+
+- name: "UFW - Allow SSH on port {{ ssh_port }}"
+  ufw:
+    rule: allow
+    port: "{{ ssh_port }}"
+
+
