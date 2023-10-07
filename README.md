@@ -32,7 +32,7 @@ users:
 
 #### Установка ПО через ANSIBLE 
 
-**В проекте использованы роли с просторов интернета, практически все не заработали с ходу, адаптированы и скомбинированы под задачу** 
+**В проекте использованы роли с просторов интернета, практически все не заработали сходу, адаптированы и скомбинированы под задачу** 
 
 Редактирую host на машине с ansible
 ```
@@ -129,6 +129,7 @@ ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/wplamp/playbook.yml
 ![LAMP installed](https://github.com/artem-senkov/cloudproject/blob/main/img/lampresult.png)
 
 3. Установка Elasticsearch Kibana Filebeats
+   
    C этип процессом возникли самые большие проблемы. Официальные репозитории не доступны из yandex cloud, плэйбуки не устанавливаются. Первым решением было установить из стороннего репозитория по прекрасной статье [https://serveradmin.ru/ustanovka-i-nastroyka-elasticsearch-logstash-kibana-elk-stack/](https://serveradmin.ru/ustanovka-i-nastroyka-elasticsearch-logstash-kibana-elk-stack/) Прописал в плэйбуки установку репозитория, ключа все взлетело, но возникли сложности с сертификатами для подключения filebeats и kibana к elasticsearch. В итоге принял решение переделать на установку deb пакетов из доступных ресурсов для 7 версии и задача была успешно решена.
 
 Kibana ставиться на отдельный сервер с внешним IP
@@ -201,3 +202,20 @@ ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/elk/filebeat-web.yml
 ![KIBANA status](https://github.com/artem-senkov/cloudproject/blob/main/img/kib1.png)
 ![KIBANA status](https://github.com/artem-senkov/cloudproject/blob/main/img/kib2.png)
 ![KIBANA status](https://github.com/artem-senkov/cloudproject/blob/main/img/kib3.png)
+
+
+4. Установка ZABBIX 6.4 на сервер
+
+Ставлю POSTGRESQL
+```
+sudo apt -y install gnupg
+sudo sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+sudo apt update
+sudo apt -y install postgresql
+```
+
+Далее по инструкции
+https://www.zabbix.com/download?zabbix=6.4&os_distribution=debian&os_version=11&components=server_frontend_agent&db=pgsql&ws=nginx
+
+![KIBANA status](https://github.com/artem-senkov/cloudproject/blob/main/img/zab1.png)
