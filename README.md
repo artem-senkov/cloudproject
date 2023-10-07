@@ -76,6 +76,7 @@ ansible_user=artem
 Запускаю роль
 
 ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/fail2ban/fail2ban.yml
+
 ![fail2ban apply](https://github.com/artem-senkov/cloudproject/blob/main/img/fail2ban01.png)
 
 
