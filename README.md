@@ -35,6 +35,6 @@ users:
 #### 1. firewall and fail2ban 
 Заметил по журналу что на машины сразу ломяться и пытаются подобрать пароль, принимаю меры
 
-[](https://github.com/artem-senkov/cloudproject/tree/main/fail2ban/roles/fail2ban)
+[fail2ban role](https://github.com/artem-senkov/cloudproject/tree/main/fail2ban/roles/fail2ban)
 
 
