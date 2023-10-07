@@ -79,5 +79,19 @@ ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/fail2ban/fail2ban.yml
 
 ![fail2ban apply](https://github.com/artem-senkov/cloudproject/blob/main/img/fail2ban01.png)
 
+На виртмашинах где нужно открыть доп порты дрбавляю в роли открытие порта 
 
+1. Zabbix TCP  80, 1050, 1051, 1052,  1053, 80, 443
+2. Kibana TCP  5601
+3. ApacheTCP  80, 443
+4. Elasticsearch, Logstash 9200, 5044
+   
+```yaml
+    - name: "UFW - Allow HTTP on port {{ http_port }}"
+      ufw:
+        rule: allow
+        port: "{{ http_port }}"
+        proto: tcp
+      tags: [ system ]
+```
 
