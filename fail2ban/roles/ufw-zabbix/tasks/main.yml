@@ -1,0 +1,49 @@
+---
+  # UFW Configurat
+
+- name: Install UFW firewall
+  apt: name=ufw update_cache=yes state=latest
+
+- name: Enable UFW
+  community.general.ufw:
+    state: enabled
+
+- name: "UFW - Allow SSH on port {{ ssh_port }}"
+  ufw:
+    rule: allow
+    port: "{{ ssh_port }}"
+
+- name: "UFW - Allow port 8080"
+  ufw:
+    rule: allow
+    port: "8080"
+
+- name: "UFW - Allow port 1050"
+  ufw:
+    rule: allow
+    port: "1050"
+    
+- name: "UFW - Allow port 1051"
+  ufw:
+    rule: allow
+    port: "1051"
+    
+- name: "UFW - Allow port 1052"
+  ufw:
+    rule: allow
+    port: "1052"
+    
+- name: "UFW - Allow port 1053"
+  ufw:
+    rule: allow
+    port: "1053"
+    
+- name: "UFW - Allow port 80"
+  ufw:
+    rule: allow
+    port: "80"
+    
+- name: "UFW - Allow port 443"
+  ufw:
+    rule: allow
+    port: "443"

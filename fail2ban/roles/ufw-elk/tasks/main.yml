@@ -1,0 +1,28 @@
+---
+  # UFW Configurat
+
+- name: Install UFW firewall
+  apt: name=ufw update_cache=yes state=latest
+
+- name: Enable UFW
+  community.general.ufw:
+    state: enabled
+
+- name: "UFW - Allow port 9200"
+  ufw:
+    rule: allow
+    port: "9200"
+    
+- name: "UFW - Allow port 5044"
+  ufw:
+    rule: allow
+    port: "5044"
+    
+- name: "UFW - Allow SSH on port {{ ssh_port }}"
+  ufw:
+    rule: allow
+    port: "{{ ssh_port }}"
+    
+
+
+

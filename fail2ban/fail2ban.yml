@@ -1,11 +1,43 @@
 ---
 #
-# Playbook to install fail2ban
+# Playbook to install fail2ban and ufw
 #
-- hosts: webservers, bast1
+- hosts: bast1
   become: yes
   become_user: root
   roles:
   - { role: ufw }
   - { role: fail2ban }
+
+- hosts: el1
+  become: yes
+  become_user: root
+  roles:
+  - { role: ufw-elk }
+  - { role: fail2ban }
+
+
+- hosts: webservers
+  become: yes
+  become_user: root
+  roles:
+  - { role: ufw-lamp }
+  - { role: fail2ban }
+
+
+- hosts: zab1
+  become: yes
+  become_user: root
+  roles:
+  - { role: ufw-zabbix }
+  - { role: fail2ban }
+
+
+- hosts: kib1
+  become: yes
+  become_user: root
+  roles:
+  - { role: ufw-kibana }
+  - { role: fail2ban }
+
 

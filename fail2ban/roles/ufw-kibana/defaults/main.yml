@@ -1,0 +1,3 @@
+# defaults file for UFC
+---
+ssh_port: "22"
