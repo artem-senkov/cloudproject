@@ -32,7 +32,7 @@ users:
 
 #### Установка ПО через ANSIBLE 
 
-**В проекте использованы роли с просторов интернета, практически все не заработали с ходу, адаптированы и скомбинированы под задачу** 
+**В проекте использованы роли с просторов интернета, практически все не заработали сходу, адаптированы и скомбинированы под задачу** 
 
 Редактирую host на машине с ansible
 ```
@@ -129,6 +129,7 @@ ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/wplamp/playbook.yml
 ![LAMP installed](https://github.com/artem-senkov/cloudproject/blob/main/img/lampresult.png)
 
 3. Установка Elasticsearch Kibana Filebeats
+   
    C этип процессом возникли самые большие проблемы. Официальные репозитории не доступны из yandex cloud, плэйбуки не устанавливаются. Первым решением было установить из стороннего репозитория по прекрасной статье [https://serveradmin.ru/ustanovka-i-nastroyka-elasticsearch-logstash-kibana-elk-stack/](https://serveradmin.ru/ustanovka-i-nastroyka-elasticsearch-logstash-kibana-elk-stack/) Прописал в плэйбуки установку репозитория, ключа все взлетело, но возникли сложности с сертификатами для подключения filebeats и kibana к elasticsearch. В итоге принял решение переделать на установку deb пакетов из доступных ресурсов для 7 версии и задача была успешно решена.
 
 Kibana ставиться на отдельный сервер с внешним IP
