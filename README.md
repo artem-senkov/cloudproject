@@ -128,3 +128,76 @@ ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/wplamp/playbook.yml
 
 ![LAMP installed](https://github.com/artem-senkov/cloudproject/blob/main/img/lampresult.png)
 
+3. Установка Elasticsearch Kibana Filebeats
+   C этип процессом возникли самые большие проблемы. Официальные репозитории не доступны из yandex cloud, плэйбуки не устанавливаются. Первым решением было установить из стороннего репозитория по прекрасной статье [https://serveradmin.ru/ustanovka-i-nastroyka-elasticsearch-logstash-kibana-elk-stack/](https://serveradmin.ru/ustanovka-i-nastroyka-elasticsearch-logstash-kibana-elk-stack/) Прописал в плэйбуки установку репозитория, ключа все взлетело, но возникли сложности с сертификатами для подключения filebeats и kibana к elasticsearch. В итоге принял решение переделать на установку deb пакетов из доступных ресурсов для 7 версии и задача была успешно решена.
+
+Kibana ставиться на отдельный сервер с внешним IP
+
+[Ссылка на роли по установке ELK](https://github.com/artem-senkov/cloudproject/tree/main/elk)
+
+Переменные для подстановки в конф. файлы находяться в /group_vars/all
+```
+---
+# servers IP
+kibanaserver_ip: 192.168.10.30
+elkserver_ip: 192.168.10.28
+```
+
+Конфиг filebeat настроен на передачу логов apache и fail2ban в elastisearch
+```
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+      -  /var/log/apache2/access.log
+  fields:
+    type: nginx_access
+  fields_under_root: true
+  scan_frequency: 5s
+
+- type: log
+  enabled: true
+  paths:
+      - /var/log/apache2/error.log
+  fields:
+    type: apache_error
+  fields_under_root: true
+  scan_frequency: 5s
+
+- type: log
+  enabled: true
+  paths:
+      - /var/log/fail2ban.log
+  fields:
+    type: fail2ban
+  fields_under_root: true
+  scan_frequency: 5s
+
+output.elasticsearch:
+  hosts: ["{{ elkserver_ip  }}:9200"]
+```
+Устанавливаю ELASTICSEARCH
+
+
+ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/elk/el.yml
+
+
+Устанавливаю KIBANA
+
+
+ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/elk/kib7.yml
+
+
+Устанавливаю FILEBEAT на webservers
+
+
+ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/elk/filebeat-web.yml
+
+
+Проверяю статус ELASTICSEARCH http://84.201.129.219:9200/_cluster/health?pretty
+![ELK status](https://github.com/artem-senkov/cloudproject/blob/main/img/elstatus.png)
+
+Захожу на kibana ip http://158.160.47.220:5601/ настраиваю индекс и вижу данные с webservers
+![KIBANA status](https://github.com/artem-senkov/cloudproject/blob/main/img/kib1.png)
+![KIBANA status](https://github.com/artem-senkov/cloudproject/blob/main/img/kib2.png)
+![KIBANA status](https://github.com/artem-senkov/cloudproject/blob/main/img/kib3.png)
