@@ -83,7 +83,7 @@ ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/fail2ban/fail2ban.yml
 
 На виртмашинах где нужно открыть доп порты дрбавляю в роли открытие порта 
 
-1. Zabbix TCP  80, 1050, 1051, 1052,  1053, 80, 443
+1. Zabbix TCP  8080, 1050, 1051, 1052,  1053, 80, 443
 2. Kibana TCP  5601
 3. ApacheTCP  80, 443
 4. Elasticsearch, Logstash 9200, 5044
@@ -96,6 +96,9 @@ ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/fail2ban/fail2ban.yml
         proto: tcp
       tags: [ system ]
 ```
+я сделал для разных типов серверов разные roles ufw-kibana, ufw-zabbix итд с доп портами для открытия.
+
+
 2. webservers установка Apache Mysql PHP и wordpress
 Решил усложнить задание установкой MYSQL, PHP и CMS Wordpress, на будущее пригодиться такой вариант для моего сайта
 
