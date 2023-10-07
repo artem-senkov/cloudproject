@@ -32,7 +32,7 @@ users:
 
 #### Установка ПО через ANSIBLE 
 
-** В проекте использованы роли с просторов интернета, практически все не заработали с ходу, адаптированы и скомбинированы под задачу ** 
+**В проекте использованы роли с просторов интернета, практически все не заработали с ходу, адаптированы и скомбинированы под задачу** 
 
 Редактирую host на машине с ansible
 ```
@@ -123,4 +123,8 @@ ssh_port: "22"
 ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/wplamp/playbook.yml
 
 ![lamp apply](https://github.com/artem-senkov/cloudproject/blob/main/img/lamp.png)
+
+Захожу на web сервера через IP loadbalancer
+
+![LAMP installed](https://github.com/artem-senkov/cloudproject/blob/main/img/lampresult.png)
 
