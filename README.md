@@ -124,3 +124,7 @@ ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/wplamp/playbook.yml
 
 ![lamp apply](https://github.com/artem-senkov/cloudproject/blob/main/img/lamp.png)
 
+Захожу на web сервера через IP loadbalancer
+
+![LAMP installed](https://github.com/artem-senkov/cloudproject/blob/main/img/lampresult.png)
+
