@@ -32,6 +32,8 @@ users:
 
 #### Установка ПО через ANSIBLE 
 
+** В проекте использованы роли с просторов интернета, практически все не заработали с ходу, адаптированы и скомбинированы под задачу ** 
+
 Редактирую host на машине с ansible
 ```
 [webservers]
@@ -56,7 +58,7 @@ ansible_user=artem
 Для развертования ПО подготовил следующие роли:
 
 1. firewall and fail2ban 
-Заметил по журналу что на машины сразу ломяться и пытаются подобрать пароль, принимаю меры
+Заметил по журналу что на машины сразу ломяться недруги и пытаются подобрать пароль, принимаю меры
 
 [fail2ban role](https://github.com/artem-senkov/cloudproject/tree/main/fail2ban/roles/fail2ban)
 
@@ -94,4 +96,31 @@ ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/fail2ban/fail2ban.yml
         proto: tcp
       tags: [ system ]
 ```
+2. webservers установка Apache Mysql PHP и wordpress
+Решил усложнить задание установкой MYSQL, PHP и CMS Wordpress, на будущее пригодиться такой вариант для моего сайта
+
+ [Ссылка на роль по установке web сервера](https://github.com/artem-senkov/cloudproject/tree/main/wplamp)
+
+Переменные роли в файле /vars/default.yml
+```
+---
+#System Settings
+php_modules: [ 'php-curl', 'php-gd', 'php-mbstring', 'php-xml', 'php-xmlrpc', 'php-soap', 'php-intl', 'php-zip' ]
+
+#MySQL Settings
+mysql_root_password: "password"
+mysql_db: "wordpressDB1"
+mysql_user: "mysqluser"
+mysql_password: "password"
+
+#HTTP Settings
+http_host: "itadmin.spb.ru"
+http_conf: "itadmin.spb.ru.conf"
+http_port: "80"
+ssh_port: "22"
+```
+Запускаю роль на группу webservers
+ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/wplamp/playbook.yml
+
+![lamp apply](https://github.com/artem-senkov/cloudproject/blob/main/img/lamp.png)
 
