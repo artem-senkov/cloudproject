@@ -202,3 +202,18 @@ ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/elk/filebeat-web.yml
 ![KIBANA status](https://github.com/artem-senkov/cloudproject/blob/main/img/kib1.png)
 ![KIBANA status](https://github.com/artem-senkov/cloudproject/blob/main/img/kib2.png)
 ![KIBANA status](https://github.com/artem-senkov/cloudproject/blob/main/img/kib3.png)
+
+
+4. Установка ZABBIX 6.4 на сервер
+
+Ставлю POSTGRESQL
+```
+sudo apt -y install gnupg
+sudo sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+sudo apt update
+sudo apt -y install postgresql
+```
+
+Далее по инструкции
+https://www.zabbix.com/download?zabbix=6.4&os_distribution=debian&os_version=11&components=server_frontend_agent&db=pgsql&ws=nginx
