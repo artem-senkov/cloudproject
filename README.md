@@ -142,6 +142,40 @@ Kibana ставиться на отдельный сервер с внешним
 kibanaserver_ip: 192.168.10.30
 elkserver_ip: 192.168.10.28
 ```
+
+Конфиг filebeat настроен на передачу логов apache и fail2ban в elastisearch
+```
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+      -  /var/log/apache2/access.log
+  fields:
+    type: nginx_access
+  fields_under_root: true
+  scan_frequency: 5s
+
+- type: log
+  enabled: true
+  paths:
+      - /var/log/apache2/error.log
+  fields:
+    type: apache_error
+  fields_under_root: true
+  scan_frequency: 5s
+
+- type: log
+  enabled: true
+  paths:
+      - /var/log/fail2ban.log
+  fields:
+    type: fail2ban
+  fields_under_root: true
+  scan_frequency: 5s
+
+output.elasticsearch:
+  hosts: ["{{ elkserver_ip  }}:9200"]
+```
 Устанавливаю ELASTICSEARCH
 
 
