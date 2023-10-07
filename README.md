@@ -128,3 +128,34 @@ ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/wplamp/playbook.yml
 
 ![LAMP installed](https://github.com/artem-senkov/cloudproject/blob/main/img/lampresult.png)
 
+3. Установка Elasticsearch Kibana Filebeats
+   C этип процессом возникли самые большие проблемы. Официальные репозитории не доступны из yandex cloud, плэйбуки не устанавливаются. Первым решением было установить из стороннего репозитория по прекрасной статье [https://serveradmin.ru/ustanovka-i-nastroyka-elasticsearch-logstash-kibana-elk-stack/](https://serveradmin.ru/ustanovka-i-nastroyka-elasticsearch-logstash-kibana-elk-stack/) Прописал в плэйбуки установку репозитория, ключа все взлетело, но возникли сложности с сертификатами для подключения filebeats и kibana к elasticsearch. В итоге принял решение переделать на установку deb пакетов из доступных ресурсов для 7 версии и задача была успешно решена.
+
+Kibana ставиться на отдельный сервер с внешним IP
+
+[Ссылка на роли по установке ELK](https://github.com/artem-senkov/cloudproject/tree/main/elk)
+
+Переменные для подстановки в конф. файлы находяться в /group_vars/all
+```
+---
+# servers IP
+kibanaserver_ip: 192.168.10.30
+elkserver_ip: 192.168.10.28
+```
+Устанавливаю ELASTICSEARCH
+
+
+ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/elk/el.yml
+
+
+Устанавливаю KIBANA
+
+
+ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/elk/kib7.yml
+
+
+Устанавливаю FILEBEAT на webservers
+
+
+ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/elk/filebeat-web.yml
+
