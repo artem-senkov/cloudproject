@@ -217,3 +217,5 @@ sudo apt -y install postgresql
 
 Далее по инструкции
 https://www.zabbix.com/download?zabbix=6.4&os_distribution=debian&os_version=11&components=server_frontend_agent&db=pgsql&ws=nginx
+
+![KIBANA status](https://github.com/artem-senkov/cloudproject/blob/main/img/zab1.png)
