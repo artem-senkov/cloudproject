@@ -9,6 +9,24 @@ https://github.com/artem-senkov/cloudproject/blob/main/terraform/webserver.tf
 
 Для авторизации на облаке сгенерировал токен key.json
 
+На вирт машины заливается ключ доступа и создается пользователь с помощью файла
+
+```yaml
+#cloud-config
+users:
+  - name: artem
+    groups: sudo
+    shell: /bin/bash
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    ssh_authorized_keys:
+```
+
 применяю terraform apply
 
 ![terraform apply](https://github.com/artem-senkov/cloudproject/blob/main/img/tfapply01.png)
+
+На выходе получаем ip адреса виртуальных машин и load balancer
+
+Для развертования ПО подготовил следующие роли
+
+#### 1. firewall and fail2ban 
