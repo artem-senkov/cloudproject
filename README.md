@@ -2,6 +2,7 @@
 
 Решаем задачу поставленную в дипломном проекте
 
+
 [Дипломное задание](https://github.com/netology-code/sys-diplom/blob/diplom-zabbix/README.md)
 
 ### Создаю инфраструктуру с помощью TERRAFORM 
