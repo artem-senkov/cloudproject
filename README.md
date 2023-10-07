@@ -193,3 +193,11 @@ ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/elk/kib7.yml
 
 ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/elk/filebeat-web.yml
 
+
+Проверяю статус ELASTICSEARCH http://84.201.129.219:9200/_cluster/health?pretty
+![ELK status](https://github.com/artem-senkov/cloudproject/blob/main/img/elstatus.png)
+
+Захожу на kibana ip http://158.160.47.220:5601/ настраиваю индекс и вижу данные с webservers
+![KIBANA status](https://github.com/artem-senkov/cloudproject/blob/main/img/kib1.png)
+![KIBANA status](https://github.com/artem-senkov/cloudproject/blob/main/img/kib2.png)
+![KIBANA status](https://github.com/artem-senkov/cloudproject/blob/main/img/kib3.png)
