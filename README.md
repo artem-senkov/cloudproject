@@ -11,4 +11,4 @@ https://github.com/artem-senkov/cloudproject/blob/main/terraform/webserver.tf
 
 применяю terraform apply
 
-![terraform apply](https://github.com/artem-senkov/cloudproject/blob/main/terraform/img/tfapply01.png)
+![terraform apply](https://github.com/artem-senkov/cloudproject/blob/main/img/tfapply01.png)
