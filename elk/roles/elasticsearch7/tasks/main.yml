@@ -18,9 +18,9 @@
    regexp: 'network.host:'
    line: 'network.host: 0.0.0.0'
 
-# Update Elasticsearch config file node.name:
+# Update Elasticsearch config file node.name
 
-- name: Updating the config file  node.name:
+- name: Updating the config file  node.name
   lineinfile:
    destfile: /etc/elasticsearch/elasticsearch.yml
    regexp: 'node.name:'
@@ -33,15 +33,15 @@
    regexp: 'discovery.seed_hosts:'
    line: 'discovery.seed_hosts: ["127.0.0.1", "[::1]"]'
 
-# Update Elasticsearch config file cluster.name:  
+# Update Elasticsearch config file cluster.name  
 
-- name: Updating the config file cluster.name:
+- name: Updating the config file cluster.name
   lineinfile:
    destfile: /etc/elasticsearch/elasticsearch.yml
    regexp: 'cluster.name:'
    line: 'cluster.name: elk-cluster1'
 
-# Update Elasticsearch config file cluster.initial_master_nodes: 
+# Update Elasticsearch config file cluster.initial_master_nodes
 
 - name: Updating the config file discovery.seed_hosts
   lineinfile:
