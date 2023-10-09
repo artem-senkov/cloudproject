@@ -83,7 +83,7 @@ ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/fail2ban/fail2ban.yml
 
 На виртмашинах где нужно открыть доп порты дрбавляю в роли открытие порта 
 
-1. Zabbix TCP  80, 1050, 1051, 1052,  1053, 80, 443
+1. Zabbix TCP  8080, 1050, 1051, 1052,  1053, 80, 443
 2. Kibana TCP  5601
 3. ApacheTCP  80, 443
 4. Elasticsearch, Logstash 9200, 5044
@@ -96,6 +96,9 @@ ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/fail2ban/fail2ban.yml
         proto: tcp
       tags: [ system ]
 ```
+я сделал для разных типов серверов разные roles ufw-kibana, ufw-zabbix итд с доп портами для открытия.
+
+
 2. webservers установка Apache Mysql PHP и wordpress
 Решил усложнить задание установкой MYSQL, PHP и CMS Wordpress, на будущее пригодиться такой вариант для моего сайта
 
@@ -218,4 +221,174 @@ sudo apt -y install postgresql
 Далее по инструкции
 https://www.zabbix.com/download?zabbix=6.4&os_distribution=debian&os_version=11&components=server_frontend_agent&db=pgsql&ws=nginx
 
-![KIBANA status](https://github.com/artem-senkov/cloudproject/blob/main/img/zab1.png)
+![ZABBIX status](https://github.com/artem-senkov/cloudproject/blob/main/img/zab1.png)
+
+5. Группы безопасности
+
+(https://cloud.yandex.ru/docs/vpc/concepts/security-groups)
+
+Открываем только следующие порты для своих подсетей
+1. Zabbix TCP  8080, 1050, 1051, 1052,  1053, 80, 443
+2. Kibana TCP  5601
+3. Apache TCP  80, 443
+4. Elasticsearch, Logstash TCP 9200, 5044
+
+```yaml
+# security group for webservers TCP  80, 443
+resource yandex_vpc_security_group vm_group_sg {
+...
+  ingress {
+    description    = "Allow HTTP protocol from local subnets"
+    protocol       = "TCP"
+    port           = "80"
+    v4_cidr_blocks = ["192.168.10.0/24", "192.168.20.0/24"]
+  }
+
+  ingress {
+    description    = "Allow HTTPS protocol from local subnets"
+    protocol       = "TCP"
+    port           = "443"
+    v4_cidr_blocks = ["192.168.10.0/24", "192.168.20.0/24"]
+  }
+
+  ingress {
+    description = "Health checks from NLB"
+    protocol = "TCP"
+    predefined_target = "loadbalancer_healthchecks" # [198.18.235.0/24, 198.18.248.0/24]
+  }
+
+  ingress {
+    description = "SSH from BAST1"
+    protocol       = "TCP"
+    port           = "22"
+    v4_cidr_blocks = [yandex_compute_instance.bast1.network_interface.0.ip_address]
+  }
+
+  egress {
+    description    = "Permit ANY"
+    protocol       = "ANY"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+
+# security group for lasticsearch, Logstash TCP 9200, 5044
+
+resource yandex_vpc_security_group vm_group_sg {
+...
+  ingress {
+    description    = "Allow HTTP protocol from local subnets"
+    protocol       = "TCP"
+    port           = "9200"
+    v4_cidr_blocks = ["192.168.10.0/24", "192.168.20.0/24"]
+  }
+
+  ingress {
+    description    = "Allow HTTPS protocol from local subnets"
+    protocol       = "TCP"
+    port           = "5044"
+    v4_cidr_blocks = ["192.168.10.0/24", "192.168.20.0/24"]
+  }
+
+  ingress {
+    description = "SSH from BAST1"
+    protocol       = "TCP"
+    port           = "22"
+    v4_cidr_blocks = [yandex_compute_instance.bast1.network_interface.0.ip_address]
+  }
+
+  egress {
+    description    = "Permit ANY"
+    protocol       = "ANY"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# security group for Kibana TCP  5601
+resource yandex_vpc_security_group vm_group_sg {
+...
+  ingress {
+    description    = "Allow HTTP protocol from any"
+    protocol       = "TCP"
+    port           = "5601"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "SSH from BAST1"
+    protocol       = "TCP"
+    port           = "22"
+    v4_cidr_blocks = [yandex_compute_instance.bast1.network_interface.0.ip_address]
+  }
+
+  egress {
+    description    = "Permit ANY"
+    protocol       = "ANY"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# security group for Zabbix TCP  8080, 1050, 1051, 1052,  1053, 80, 443
+resource yandex_vpc_security_group vm_group_sg {
+...
+  ingress {
+    description    = "Allow HTTP protocol from any"
+    protocol       = "TCP"
+    port           = "80"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description    = "Allow HTTP protocol from any"
+    protocol       = "TCP"
+    port           = "8080"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description    = "Allow HTTPS protocol from any"
+    protocol       = "TCP"
+    port           = "443"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description    = "Allow TCP protocol from local groups"
+    protocol       = "TCP"
+    portfrom       = "1050"
+    portto         = "1053"
+    v4_cidr_blocks = ["192.168.10.0/24", "192.168.20.0/24"]
+  }
+
+  ingress {
+    description = "SSH from BAST1"
+    protocol       = "TCP"
+    port           = "22"
+    v4_cidr_blocks = [yandex_compute_instance.bast1.network_interface.0.ip_address]
+  }
+
+  egress {
+    description    = "Permit ANY"
+    protocol       = "ANY"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# security group for Zabbix TCP  8080, 1050, 1051, 1052,  1053, 80, 443
+resource yandex_vpc_security_group vm_group_sg {
+...
+  ingress {
+    description = "SSH"
+    protocol       = "TCP"
+    port           = "22"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    description    = "Permit ANY"
+    protocol       = "ANY"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+```
+
