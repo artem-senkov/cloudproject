@@ -30,8 +30,9 @@ resource "yandex_compute_instance" "ws1" {
   }
 
   network_interface {
-    subnet_id = yandex_vpc_subnet.subnet-1.id
-    nat       = true
+    subnet_id = yandex_vpc_subnet.subnet-3.id
+	security_group_ids = [yandex_vpc_security_group.vm_group_webservers.id]
+    nat       = false
   }
 
   metadata = {
@@ -58,7 +59,8 @@ resource "yandex_compute_instance" "ws2" {
 
   network_interface {
     subnet_id = yandex_vpc_subnet.subnet-2.id
-    nat       = true
+	security_group_ids = [yandex_vpc_security_group.vm_group_webservers.id]
+    nat       = false
   }
 
   metadata = {
@@ -84,8 +86,9 @@ resource "yandex_compute_instance" "elk1" {
   }
 
   network_interface {
-    subnet_id = yandex_vpc_subnet.subnet-1.id
-    nat       = true
+    subnet_id = yandex_vpc_subnet.subnet-3.id
+	security_group_ids = [yandex_vpc_security_group.vm_group_elk.id]
+    nat       = false
   }
 
   metadata = {
@@ -112,6 +115,7 @@ resource "yandex_compute_instance" "kib1" {
 
   network_interface {
     subnet_id = yandex_vpc_subnet.subnet-1.id
+	security_group_ids = [yandex_vpc_security_group.vm_group_kibana.id]
     nat       = true
   }
 
@@ -139,6 +143,7 @@ resource "yandex_compute_instance" "zab1" {
 
   network_interface {
     subnet_id = yandex_vpc_subnet.subnet-1.id
+	security_group_ids = [yandex_vpc_security_group.vm_group_zabbix.id]
     nat       = true
   }
 
@@ -166,6 +171,7 @@ resource "yandex_compute_instance" "bast1" {
 
   network_interface {
     subnet_id = yandex_vpc_subnet.subnet-1.id
+	security_group_ids = [yandex_vpc_security_group.vm_group_bastion.id]
     nat       = true
   }
 
@@ -174,29 +180,11 @@ resource "yandex_compute_instance" "bast1" {
   }
 }
 
-resource "yandex_vpc_network" "network-1" {
-  name = "network1"
-}
-
-resource "yandex_vpc_subnet" "subnet-1" {
-  name           = "subnet1"
-  zone = "ru-central1-a"
-  network_id     = yandex_vpc_network.network-1.id
-  v4_cidr_blocks = ["192.168.10.0/24"]
-}
-
-resource "yandex_vpc_subnet" "subnet-2" {
-  name           = "subnet2"
-  zone = "ru-central1-b"
-  network_id     = yandex_vpc_network.network-1.id
-  v4_cidr_blocks = ["192.168.11.0/24"]
-}
-
 resource "yandex_alb_target_group" "foo" {
   name           = "webservers"
 
   target {
-    subnet_id    = yandex_vpc_subnet.subnet-1.id
+    subnet_id    = yandex_vpc_subnet.subnet-3.id
     ip_address   = yandex_compute_instance.ws1.network_interface.0.ip_address
   }
 
