@@ -178,6 +178,29 @@ resource "yandex_compute_instance" "bast1" {
   metadata = {
     user-data = "${file("c:/terraform/meta.yaml")}"
   }
+  connection {
+    type        = "ssh"
+    user        = "artem"
+    private_key = "${file("mysshkey.key")}"
+    host        = "${ yandex_compute_instance.bast1.network_interface.0.nat_ip_address }"
+  }
+  
+  provisioner "file" {
+    source      = "mysshkey.key"
+    destination = "/home/artem/.ssh/mysshkey.key"
+  }
+  
+  provisioner "remote-exec" {
+    inline = [
+      "sudo apt update",
+      "sudo apt install -y git gnupg2 wget python3 python3-pip mc",
+	  "sudo pip install ansible",
+	  "sudo apt install sshpass -y",
+	  "git clone https://github.com/artem-senkov/cloudproject.git",
+	  "sudo chmod 600 ~/.ssh/mysshkey.key",
+	  "export ANSIBLE_HOST_KEY_CHECKING=False"
+	  ]
+  }
 }
 
 resource "yandex_alb_target_group" "foo" {
