@@ -7,7 +7,10 @@
 
 ### Создаю инфраструктуру с помощью TERRAFORM 
 
-https://github.com/artem-senkov/cloudproject/blob/main/terraform/webserver.tf
+[Сеть и группы безопасности networks.tf](https://github.com/artem-senkov/cloudproject/blob/main/terraform/networks.tf)
+
+
+[Основной файл webserver.tf](https://github.com/artem-senkov/cloudproject/blob/main/terraform/webserver.tf)
 
 Для авторизации на облаке сгенерировал токен key.json
 
@@ -22,6 +25,44 @@ users:
     sudo: ['ALL=(ALL) NOPASSWD:ALL']
     ssh_authorized_keys:
 
+```
+На бастион автоматом ставлю ansible и заливаю ключ, конфиги и репозиторий проекта
+
+```yaml
+connection {
+    type        = "ssh"
+    user        = "artem"
+    private_key = "${file("mysshkey.key")}"
+    host        = "${ yandex_compute_instance.bast1.network_interface.0.nat_ip_address }"
+  }
+  
+  provisioner "file" {
+    source      = "mysshkey.key"
+    destination = "/home/artem/.ssh/mysshkey.key"
+  }
+  
+  provisioner "file" {
+    source      = "conf/ansible.cfg"
+    destination = "/home/artem/ansible.cfg"
+  }
+  
+  provisioner "file" {
+    source      = "conf/config"
+    destination = "/home/artem/.ssh/config"
+  }
+  
+  provisioner "remote-exec" {
+    inline = [
+      "sudo apt update",
+      "sudo apt install -y git gnupg2 wget python3 python3-pip mc",
+	  "sudo pip install ansible",
+	  "sudo apt install sshpass -y",
+	  "git clone https://github.com/artem-senkov/cloudproject.git",
+	  "sudo chmod 600 ~/.ssh/mysshkey.key",
+	  "export ANSIBLE_HOST_KEY_CHECKING=False",
+	  "sudo mv /home/artem/ansible.cfg /etc/ansible.cfg"
+	  ]
+  }
 ```
 
 применяю terraform apply
