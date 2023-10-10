@@ -32,7 +32,7 @@ resource "yandex_compute_instance" "ws1" {
   network_interface {
     subnet_id = yandex_vpc_subnet.subnet-3.id
 	security_group_ids = [yandex_vpc_security_group.vm_group_webservers.id]
-    nat       = false
+    nat       = true
   }
 
   metadata = {
@@ -60,7 +60,7 @@ resource "yandex_compute_instance" "ws2" {
   network_interface {
     subnet_id = yandex_vpc_subnet.subnet-2.id
 	security_group_ids = [yandex_vpc_security_group.vm_group_webservers.id]
-    nat       = false
+    nat       = true
   }
 
   metadata = {
@@ -88,7 +88,7 @@ resource "yandex_compute_instance" "elk1" {
   network_interface {
     subnet_id = yandex_vpc_subnet.subnet-3.id
 	security_group_ids = [yandex_vpc_security_group.vm_group_elk.id]
-    nat       = false
+    nat       = true
   }
 
   metadata = {
@@ -190,6 +190,16 @@ resource "yandex_compute_instance" "bast1" {
     destination = "/home/artem/.ssh/mysshkey.key"
   }
   
+  provisioner "file" {
+    source      = "conf/ansible.cfg"
+    destination = "/home/artem/ansible.cfg"
+  }
+  
+  provisioner "file" {
+    source      = "conf/config"
+    destination = "/home/artem/.ssh/config"
+  }
+  
   provisioner "remote-exec" {
     inline = [
       "sudo apt update",
@@ -198,7 +208,8 @@ resource "yandex_compute_instance" "bast1" {
 	  "sudo apt install sshpass -y",
 	  "git clone https://github.com/artem-senkov/cloudproject.git",
 	  "sudo chmod 600 ~/.ssh/mysshkey.key",
-	  "export ANSIBLE_HOST_KEY_CHECKING=False"
+	  "export ANSIBLE_HOST_KEY_CHECKING=False",
+	  "sudo mv /home/artem/ansible.cfg /etc/ansible.cfg"
 	  ]
   }
 }
