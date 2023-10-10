@@ -124,7 +124,7 @@ ansible-playbook -v -i ~/cloudproject/hosts  ~/cloudproject/fail2ban/fail2ban.ym
 
 На виртмашинах где нужно открыть доп порты дрбавляю в роли открытие порта 
 
-1. Zabbix TCP  8080, 1050, 1051, 1052,  1053, 80, 443
+1. Zabbix TCP  8080, 10050, 10051, 10052,  10053, 80, 443
 2. Kibana TCP  5601
 3. ApacheTCP  80, 443
 4. Elasticsearch, Logstash 9200, 5044
@@ -261,6 +261,8 @@ sudo apt -y install postgresql
 Далее по инструкции
 https://www.zabbix.com/download?zabbix=6.4&os_distribution=debian&os_version=11&components=server_frontend_agent&db=pgsql&ws=nginx
 
+
+https://www.zabbix.com/documentation/current/en/manual/installation/requirements#default-port-numbers
 ![ZABBIX status](https://github.com/artem-senkov/cloudproject/blob/main/img/zab1.png)
 
 5. Группы безопасности
@@ -268,7 +270,7 @@ https://www.zabbix.com/download?zabbix=6.4&os_distribution=debian&os_version=11&
 (https://cloud.yandex.ru/docs/vpc/concepts/security-groups)
 
 Открываем только следующие порты для своих подсетей
-1. Zabbix TCP  8080, 1050, 1051, 1052,  1053, 80, 443
+1. Zabbix TCP  8080, 10050, 10051, 10052,  10053, 80, 443
 2. Kibana TCP  5601
 3. Apache TCP  80, 443
 4. Elasticsearch, Logstash TCP 9200, 5044
