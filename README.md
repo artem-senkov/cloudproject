@@ -7,7 +7,10 @@
 
 ### Создаю инфраструктуру с помощью TERRAFORM 
 
-https://github.com/artem-senkov/cloudproject/blob/main/terraform/webserver.tf
+[Сеть и группы безопасности networks.tf](https://github.com/artem-senkov/cloudproject/blob/main/terraform/networks.tf)
+
+
+[Основной файл webserver.tf](https://github.com/artem-senkov/cloudproject/blob/main/terraform/webserver.tf)
 
 Для авторизации на облаке сгенерировал токен key.json
 
@@ -23,6 +26,44 @@ users:
     ssh_authorized_keys:
 
 ```
+На бастион автоматом ставлю ansible и заливаю ключ, конфиги и репозиторий проекта
+
+```yaml
+connection {
+    type        = "ssh"
+    user        = "artem"
+    private_key = "${file("mysshkey.key")}"
+    host        = "${ yandex_compute_instance.bast1.network_interface.0.nat_ip_address }"
+  }
+  
+  provisioner "file" {
+    source      = "mysshkey.key"
+    destination = "/home/artem/.ssh/mysshkey.key"
+  }
+  
+  provisioner "file" {
+    source      = "conf/ansible.cfg"
+    destination = "/home/artem/ansible.cfg"
+  }
+  
+  provisioner "file" {
+    source      = "conf/config"
+    destination = "/home/artem/.ssh/config"
+  }
+  
+  provisioner "remote-exec" {
+    inline = [
+      "sudo apt update",
+      "sudo apt install -y git gnupg2 wget python3 python3-pip mc",
+	  "sudo pip install ansible",
+	  "sudo apt install sshpass -y",
+	  "git clone https://github.com/artem-senkov/cloudproject.git",
+	  "sudo chmod 600 ~/.ssh/mysshkey.key",
+	  "export ANSIBLE_HOST_KEY_CHECKING=False",
+	  "sudo mv /home/artem/ansible.cfg /etc/ansible.cfg"
+	  ]
+  }
+```
 
 применяю terraform apply
 
@@ -34,25 +75,25 @@ users:
 
 **В проекте использованы роли с просторов интернета, практически все не заработали сходу, адаптированы и скомбинированы под задачу** 
 
-Редактирую host на машине с ansible
+Редактирую host на машине bast1 с ansible
 ```
 [webservers]
-ws1 ansible_ssh_host=158.160.110.182
-ws2 ansible_ssh_host=158.160.79.117
+ws1 ansible_ssh_host=192.168.12.21
+ws2 ansible_ssh_host=192.168.11.8
 
 [elk]
-elk1 ansible_ssh_host=158.160.116.86
-kib1 ansible_ssh_host=158.160.124.98
+elk1 ansible_ssh_host=192.168.12.30
+kib1 ansible_ssh_host=192.168.10.29
 
 [other]
-zab1 ansible_ssh_host=158.160.97.122
-bast1  ansible_ssh_host=158.160.125.178
+zab1 ansible_ssh_host=192.168.10.16
+bast1  ansible_ssh_host=192.168.10.6
 
 [all:vars]
-ansible_ssh_private_key_file=~/.ssh/mysshkey
+ansible_ssh_private_key_file=~/.ssh/mysshkey.key
 ansible_user=artem
 ```
-Приватный ключ в файле/.ssh/mysshkey
+Приватный ключ в файле/.ssh/mysshkey.key
 
 
 Для развертования ПО подготовил следующие роли:
@@ -77,7 +118,7 @@ ansible_user=artem
 
 Запускаю роль
 
-ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/fail2ban/fail2ban.yml
+ansible-playbook -v -i ~/cloudproject/hosts  ~/cloudproject/fail2ban/fail2ban.yml
 
 ![fail2ban apply](https://github.com/artem-senkov/cloudproject/blob/main/img/fail2ban.png)
 
@@ -123,7 +164,7 @@ http_port: "80"
 ssh_port: "22"
 ```
 Запускаю роль на группу webservers
-ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/wplamp/playbook.yml
+ansible-playbook -v -i ~/cloudproject/hosts ~/cloudproject/wplamp/playbook.yml
 
 ![lamp apply](https://github.com/artem-senkov/cloudproject/blob/main/img/lamp.png)
 
@@ -182,20 +223,19 @@ output.elasticsearch:
 ```
 Устанавливаю ELASTICSEARCH
 
-
-ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/elk/el.yml
+ansible-playbook -v -i ~/cloudproject/hosts ~/cloudproject/elk/el.yml
 
 
 Устанавливаю KIBANA
 
 
-ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/elk/kib7.yml
+ansible-playbook -v -i ~/cloudproject/hosts ~/cloudproject/elk/kib7.yml
 
 
 Устанавливаю FILEBEAT на webservers
 
 
-ansible-playbook -v -i ~/ansible/hosts ~/cloudproject/elk/filebeat-web.yml
+ansible-playbook -v -i ~/cloudproject/hosts ~/cloudproject/elk/filebeat-web.yml
 
 
 Проверяю статус ELASTICSEARCH http://84.201.129.219:9200/_cluster/health?pretty
@@ -234,89 +274,6 @@ https://www.zabbix.com/download?zabbix=6.4&os_distribution=debian&os_version=11&
 4. Elasticsearch, Logstash TCP 9200, 5044
 
 ```yaml
-# security group for webservers TCP  80, 443
-resource yandex_vpc_security_group vm_group_webservers {
-  name        = "vm_group_webservers"
-  description = "vm_group_webservers"
-  network_id  = "${yandex_vpc_network.network-1.id}"
-  labels = {
-    my-label = "webservers"
-  }
-
-  ingress {
-    description    = "Allow HTTP protocol from local subnets"
-    protocol       = "TCP"
-    port           = "80"
-    v4_cidr_blocks = ["192.168.10.0/24", "192.168.11.0/24", "192.168.12.0/24"]
-  }
-
-  ingress {
-    description    = "Allow HTTPS protocol from local subnets"
-    protocol       = "TCP"
-    port           = "443"
-    v4_cidr_blocks = ["192.168.10.0/24", "192.168.11.0/24", "192.168.12.0/24"]
-  }
-
-  ingress {
-    description = "Health checks from NLB"
-    protocol = "TCP"
-    predefined_target = "loadbalancer_healthchecks" 
-  }
-
-  ingress {
-    description = "SSH from BAST1"
-    protocol       = "TCP"
-    port           = "22"
-	security_group_id = yandex_vpc_security_group.vm_group_bastion.id
-  }
-
-  egress {
-    description    = "Permit ANY"
-    protocol       = "ANY"
-    v4_cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-
-# security group for lasticsearch, Logstash TCP 9200, 5044
-
-resource yandex_vpc_security_group vm_group_elk {
-  name        = "vm_group_elk"
-  description = "vm_group_elk"
-  network_id  = "${yandex_vpc_network.network-1.id}"
-  labels = {
-    my-label = "elk"
-  }
-  
-  ingress {
-    description    = "Allow HTTP protocol from local subnets"
-    protocol       = "TCP"
-    port           = "9200"
-    v4_cidr_blocks = ["192.168.10.0/24", "192.168.11.0/24", "192.168.12.0/24"]
-  }
-
-  ingress {
-    description    = "Allow HTTPS protocol from local subnets"
-    protocol       = "TCP"
-    port           = "5044"
-    v4_cidr_blocks = ["192.168.10.0/24", "192.168.11.0/24", "192.168.12.0/24"]
-  }
-
-  ingress {
-    description = "SSH from BAST1"
-    protocol       = "TCP"
-    port           = "22"
-    security_group_id = yandex_vpc_security_group.vm_group_bastion.id
-  }
-
-  egress {
-    description    = "Permit ANY"
-    protocol       = "ANY"
-    v4_cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-# security group for Kibana TCP  5601
 resource yandex_vpc_security_group vm_group_kibana {
   name        = "vm_group_kibana"
   description = "vm_group_kibana"
