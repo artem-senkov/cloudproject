@@ -95,6 +95,10 @@ ansible_user=artem
 ```
 Приватный ключ в файле/.ssh/mysshkey.key
 
+Проверяю доступность хостов
+
+ansible all -i ~/cloudproject/hosts -m ping
+
 
 Для развертования ПО подготовил следующие роли:
 
