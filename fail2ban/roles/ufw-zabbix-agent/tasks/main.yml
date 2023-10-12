@@ -8,16 +8,6 @@
   community.general.ufw:
     state: enabled
 
-- name: "UFW - Allow SSH on port {{ ssh_port }}"
-  ufw:
-    rule: allow
-    port: "{{ ssh_port }}"
-
-- name: "UFW - Allow port 8080"
-  ufw:
-    rule: allow
-    port: "8080"
-
 - name: "UFW - Allow port 10050"
   ufw:
     rule: allow
@@ -38,12 +28,3 @@
     rule: allow
     port: "10053"
     
-- name: "UFW - Allow port 80"
-  ufw:
-    rule: allow
-    port: "80"
-    
-- name: "UFW - Allow port 443"
-  ufw:
-    rule: allow
-    port: "443"

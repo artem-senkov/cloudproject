@@ -7,6 +7,7 @@
   become_user: root
   roles:
   - { role: ufw }
+  - { role: ufw-zabbix-agent }
   - { role: fail2ban }
 
 - hosts: elk1
@@ -14,6 +15,7 @@
   become_user: root
   roles:
   - { role: ufw-elk }
+  - { role: ufw-zabbix-agent }
   - { role: fail2ban }
 
 
@@ -22,6 +24,7 @@
   become_user: root
   roles:
   - { role: ufw-lamp }
+  - { role: ufw-zabbix-agent }
   - { role: fail2ban }
 
 
@@ -30,6 +33,7 @@
   become_user: root
   roles:
   - { role: ufw-zabbix }
+  - { role: ufw-zabbix-agent }
   - { role: fail2ban }
 
 
@@ -38,6 +42,7 @@
   become_user: root
   roles:
   - { role: ufw-kibana }
+  - { role: ufw-zabbix-agent }
   - { role: fail2ban }
 
 

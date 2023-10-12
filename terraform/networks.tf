@@ -60,6 +60,14 @@ resource yandex_vpc_security_group vm_group_webservers {
     port           = "22"
 	security_group_id = yandex_vpc_security_group.vm_group_bastion.id
   }
+  
+  ingress {
+    description    = "Allow TCP protocol ZABBIX ports from local groups"
+    protocol       = "TCP"
+    from_port      = "10050"
+    to_port        = "10053"
+    v4_cidr_blocks = ["192.168.10.0/24", "192.168.11.0/24", "192.168.12.0/24"]
+  }
 
   egress {
     description    = "Permit ANY"
@@ -100,6 +108,14 @@ resource yandex_vpc_security_group vm_group_elk {
     security_group_id = yandex_vpc_security_group.vm_group_bastion.id
   }
 
+  ingress {
+    description    = "Allow TCP protocol ZABBIX ports from local groups"
+    protocol       = "TCP"
+    from_port      = "10050"
+    to_port        = "10053"
+    v4_cidr_blocks = ["192.168.10.0/24", "192.168.11.0/24", "192.168.12.0/24"]
+  }
+
   egress {
     description    = "Permit ANY"
     protocol       = "ANY"
@@ -121,6 +137,14 @@ resource yandex_vpc_security_group vm_group_kibana {
     protocol       = "TCP"
     port           = "5601"
     v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description    = "Allow TCP protocol ZABBIX ports from local groups"
+    protocol       = "TCP"
+    from_port      = "10050"
+    to_port        = "10053"
+    v4_cidr_blocks = ["192.168.10.0/24", "192.168.11.0/24", "192.168.12.0/24"]
   }
 
   ingress {
@@ -170,8 +194,8 @@ resource yandex_vpc_security_group vm_group_zabbix {
   ingress {
     description    = "Allow TCP protocol from local groups"
     protocol       = "TCP"
-    from_port      = "1050"
-    to_port        = "1053"
+    from_port      = "10050"
+    to_port        = "10053"
     v4_cidr_blocks = ["192.168.10.0/24", "192.168.11.0/24", "192.168.12.0/24"]
   }
 
