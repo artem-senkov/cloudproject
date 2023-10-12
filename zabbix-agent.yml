@@ -1,0 +1,15 @@
+- hosts: all
+  roles:
+    - role: zabbix.zabbix.zabbix_agent
+      run_host_tasks: True                             # enable Zabbix API host tasks;
+      ### Zabbix API properties
+      zabbix_api_host: 192.168.10.38                   # Zabbix frontend server;
+      zabbix_api_port: 80                             # Zabbix fronted connection port;
+      zabbix_api_user: Admin                           # Zabbix user name for API connection;
+      zabbix_api_password: zabbix                      # Zabbix user password for API connection;
+      zabbix_api_use_ssl: False                         # Use secure connection;
+      ### Zabbix host configuration
+      zabbix_host_templates: ["Linux by Zabbix agent"]  # Assign list of templates to the host;
+      ### Zabbix agent configuration
+      param_server: 192.168.10.38                     # address of Zabbix server to accept connections from;
+      firewall_allow_from: 192.168.10.38              # address of Zabbix server to allow connections from using firewalld;
