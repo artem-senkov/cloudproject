@@ -95,6 +95,10 @@ ansible_user=artem
 ```
 Приватный ключ в файле/.ssh/mysshkey.key
 
+Проверяю доступность хостов
+
+ansible all -i ~/cloudproject/hosts -m ping
+
 
 Для развертования ПО подготовил следующие роли:
 
@@ -283,7 +287,35 @@ sudo systemctl enable zabbix-server zabbix-agent nginx php7.4-fpm
 https://www.zabbix.com/documentation/current/en/manual/installation/requirements#default-port-numbers
 ![ZABBIX status](https://github.com/artem-senkov/cloudproject/blob/main/img/zab1.png)
 
-5. Группы безопасности
+
+5. Zabbix agent
+
+Мспользую роль для установки: https://github.com/zabbix/ansible-collection/blob/main/roles/zabbix_agent/README.md
+
+ansible-galaxy collection install zabbix.zabbix
+
+файл для установки на серверы zabbix-agent.yml
+
+```yaml
+- hosts: all
+  roles:
+    - role: zabbix.zabbix.zabbix_agent
+      run_host_tasks: True                             # enable Zabbix API host tasks;
+      ### Zabbix API properties
+      zabbix_api_host: 192.168.10.38                   # Zabbix frontend server;
+      zabbix_api_port: 80                             # Zabbix fronted connection port;
+      zabbix_api_user: Admin                           # Zabbix user name for API connection;
+      zabbix_api_password: zabbix                      # Zabbix user password for API connection;
+      zabbix_api_use_ssl: False                         # Use secure connection;
+      ### Zabbix host configuration
+      zabbix_host_templates: ["Linux by Zabbix agent"]  # Assign list of templates to the host;
+      ### Zabbix agent configuration
+      param_server: 192.168.10.38                     # address of Zabbix server to accept connections from;
+      firewall_allow_from: 192.168.10.38              # address of Zabbix server to allow connections from using firewalld;
+```
+ansible-playbook -v -i ~/cloudproject/hosts ~/cloudproject/zabbix-agent.yml
+
+6. Группы безопасности
 
 (https://cloud.yandex.ru/docs/vpc/concepts/security-groups)
 
@@ -294,6 +326,104 @@ https://www.zabbix.com/documentation/current/en/manual/installation/requirements
 4. Elasticsearch, Logstash TCP 9200, 5044
 
 ```yaml
+resource yandex_vpc_security_group vm_group_webservers {
+  name        = "vm_group_webservers"
+  description = "vm_group_webservers"
+  network_id  = "${yandex_vpc_network.network-1.id}"
+  labels = {
+    my-label = "webservers"
+  }
+
+  ingress {
+    description    = "Allow HTTP protocol from local subnets"
+    protocol       = "TCP"
+    port           = "80"
+    v4_cidr_blocks = ["192.168.10.0/24", "192.168.11.0/24", "192.168.12.0/24"]
+  }
+
+  ingress {
+    description    = "Allow HTTPS protocol from local subnets"
+    protocol       = "TCP"
+    port           = "443"
+    v4_cidr_blocks = ["192.168.10.0/24", "192.168.11.0/24", "192.168.12.0/24"]
+  }
+
+  ingress {
+    description = "Health checks from NLB"
+    protocol = "TCP"
+    predefined_target = "loadbalancer_healthchecks" 
+  }
+
+  ingress {
+    description = "SSH from BAST1"
+    protocol       = "TCP"
+    port           = "22"
+	security_group_id = yandex_vpc_security_group.vm_group_bastion.id
+  }
+  
+  ingress {
+    description    = "Allow TCP protocol ZABBIX ports from local groups"
+    protocol       = "TCP"
+    from_port      = "10050"
+    to_port        = "10053"
+    v4_cidr_blocks = ["192.168.10.0/24", "192.168.11.0/24", "192.168.12.0/24"]
+  }
+
+  egress {
+    description    = "Permit ANY"
+    protocol       = "ANY"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+
+# security group for lasticsearch, Logstash TCP 9200, 5044
+
+resource yandex_vpc_security_group vm_group_elk {
+  name        = "vm_group_elk"
+  description = "vm_group_elk"
+  network_id  = "${yandex_vpc_network.network-1.id}"
+  labels = {
+    my-label = "elk"
+  }
+  
+  ingress {
+    description    = "Allow HTTP protocol from local subnets"
+    protocol       = "TCP"
+    port           = "9200"
+    v4_cidr_blocks = ["192.168.10.0/24", "192.168.11.0/24", "192.168.12.0/24"]
+  }
+
+  ingress {
+    description    = "Allow HTTPS protocol from local subnets"
+    protocol       = "TCP"
+    port           = "5044"
+    v4_cidr_blocks = ["192.168.10.0/24", "192.168.11.0/24", "192.168.12.0/24"]
+  }
+
+  ingress {
+    description = "SSH from BAST1"
+    protocol       = "TCP"
+    port           = "22"
+    security_group_id = yandex_vpc_security_group.vm_group_bastion.id
+  }
+
+  ingress {
+    description    = "Allow TCP protocol ZABBIX ports from local groups"
+    protocol       = "TCP"
+    from_port      = "10050"
+    to_port        = "10053"
+    v4_cidr_blocks = ["192.168.10.0/24", "192.168.11.0/24", "192.168.12.0/24"]
+  }
+
+  egress {
+    description    = "Permit ANY"
+    protocol       = "ANY"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# security group for Kibana TCP  5601
 resource yandex_vpc_security_group vm_group_kibana {
   name        = "vm_group_kibana"
   description = "vm_group_kibana"
@@ -307,6 +437,14 @@ resource yandex_vpc_security_group vm_group_kibana {
     protocol       = "TCP"
     port           = "5601"
     v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description    = "Allow TCP protocol ZABBIX ports from local groups"
+    protocol       = "TCP"
+    from_port      = "10050"
+    to_port        = "10053"
+    v4_cidr_blocks = ["192.168.10.0/24", "192.168.11.0/24", "192.168.12.0/24"]
   }
 
   ingress {
@@ -356,8 +494,8 @@ resource yandex_vpc_security_group vm_group_zabbix {
   ingress {
     description    = "Allow TCP protocol from local groups"
     protocol       = "TCP"
-    from_port      = "1050"
-    to_port        = "1053"
+    from_port      = "10050"
+    to_port        = "10053"
     v4_cidr_blocks = ["192.168.10.0/24", "192.168.11.0/24", "192.168.12.0/24"]
   }
 
@@ -389,6 +527,14 @@ resource yandex_vpc_security_group vm_group_bastion {
     protocol       = "TCP"
     port           = "22"
     v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description    = "Allow TCP protocol from local groups"
+    protocol       = "TCP"
+    from_port      = "10050"
+    to_port        = "10053"
+    v4_cidr_blocks = ["192.168.10.0/24", "192.168.11.0/24", "192.168.12.0/24"]
   }
 
   egress {
