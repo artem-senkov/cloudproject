@@ -315,6 +315,8 @@ ansible-galaxy collection install zabbix.zabbix
 ```
 ansible-playbook -v -i ~/cloudproject/hosts ~/cloudproject/zabbix-agent.yml
 
+![ZABBIX hosts](https://github.com/artem-senkov/cloudproject/blob/main/img/zab2.png)
+
 6. Группы безопасности
 
 (https://cloud.yandex.ru/docs/vpc/concepts/security-groups)
