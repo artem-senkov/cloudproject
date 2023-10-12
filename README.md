@@ -261,6 +261,21 @@ sudo apt -y install postgresql-15
 Далее по инструкции
 https://www.zabbix.com/download?zabbix=6.4&os_distribution=debian&os_version=11&components=server_frontend_agent&db=pgsql&ws=nginx
 
+```bash
+sudo wget https://repo.zabbix.com/zabbix/6.4/debian/pool/main/z/zabbix-release/zabbix-release_6.4-1+debian11_all.deb
+sudo dpkg -i zabbix-release_6.4-1+debian11_all.deb
+sudo apt update
+sudo apt install zabbix-server-pgsql zabbix-frontend-php php7.4-pgsql zabbix-nginx-conf zabbix-sql-scripts zabbix-agent
+sudo -u postgres createuser --pwprompt zabbix
+sudo -u postgres createdb -O zabbix zabbix
+sudo zcat /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz | sudo -u zabbix psql zabbix
+
+```
+Edit file /etc/zabbix/zabbix_server.conf DBPassword=password
+
+
+Edit file /etc/zabbix/nginx.conf uncomment and set 'listen' and 'server_name' directives.
+
 
 https://www.zabbix.com/documentation/current/en/manual/installation/requirements#default-port-numbers
 ![ZABBIX status](https://github.com/artem-senkov/cloudproject/blob/main/img/zab1.png)
