@@ -275,7 +275,10 @@ Edit file /etc/zabbix/zabbix_server.conf DBPassword=password
 
 
 Edit file /etc/zabbix/nginx.conf uncomment and set 'listen' and 'server_name' directives.
-
+```
+sudo systemctl restart zabbix-server zabbix-agent nginx php7.4-fpm
+sudo systemctl enable zabbix-server zabbix-agent nginx php7.4-fpm
+```
 
 https://www.zabbix.com/documentation/current/en/manual/installation/requirements#default-port-numbers
 ![ZABBIX status](https://github.com/artem-senkov/cloudproject/blob/main/img/zab1.png)
