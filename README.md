@@ -285,12 +285,10 @@ sudo systemctl enable zabbix-server zabbix-agent nginx php7.4-fpm
 ```
 
 https://www.zabbix.com/documentation/current/en/manual/installation/requirements#default-port-numbers
-![ZABBIX status](https://github.com/artem-senkov/cloudproject/blob/main/img/zab1.png)
-
 
 5. Zabbix agent
 
-Мспользую роль для установки: https://github.com/zabbix/ansible-collection/blob/main/roles/zabbix_agent/README.md
+Использую роль для установки: https://github.com/zabbix/ansible-collection/blob/main/roles/zabbix_agent/README.md
 
 ansible-galaxy collection install zabbix.zabbix
 
@@ -315,7 +313,7 @@ ansible-galaxy collection install zabbix.zabbix
 ```
 ansible-playbook -v -i ~/cloudproject/hosts ~/cloudproject/zabbix-agent.yml
 
-![ZABBIX hosts](https://github.com/artem-senkov/cloudproject/blob/main/img/zab2.png)
+![ZABBIX hosts](https://github.com/artem-senkov/cloudproject/blob/main/img/zab1.png)
 
 Настроил дашборд для мониторинга основных показателей и доступности webservers
 ![ZABBIX dashboard](https://github.com/artem-senkov/cloudproject/blob/main/img/zabbix_dash1.png)
