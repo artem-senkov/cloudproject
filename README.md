@@ -317,6 +317,9 @@ ansible-playbook -v -i ~/cloudproject/hosts ~/cloudproject/zabbix-agent.yml
 
 ![ZABBIX hosts](https://github.com/artem-senkov/cloudproject/blob/main/img/zab2.png)
 
+Настроил дашборд для мониторинга основных показателей и доступности webservers
+![ZABBIX dashboard](https://github.com/artem-senkov/cloudproject/blob/main/img/zabbix_dash1.png)
+
 6. Группы безопасности
 
 (https://cloud.yandex.ru/docs/vpc/concepts/security-groups)
@@ -546,4 +549,6 @@ resource yandex_vpc_security_group vm_group_bastion {
   }
 }
 ```
-
+7. Резервное копирование
+В yandex cloud console создал политику и применил к дискам ВМ
+![Backup settings](https://github.com/artem-senkov/cloudproject/blob/main/img/backup1.png)
