@@ -33,6 +33,7 @@ resource "yandex_compute_instance" "ws1" {
     subnet_id = yandex_vpc_subnet.subnet-3.id
 	security_group_ids = [yandex_vpc_security_group.vm_group_webservers.id]
     nat       = true
+	ip_address = "192.168.12.100"
   }
 
   metadata = {
@@ -61,6 +62,7 @@ resource "yandex_compute_instance" "ws2" {
     subnet_id = yandex_vpc_subnet.subnet-2.id
 	security_group_ids = [yandex_vpc_security_group.vm_group_webservers.id]
     nat       = true
+	ip_address = "192.168.11.100"
   }
 
   metadata = {
@@ -117,6 +119,7 @@ resource "yandex_compute_instance" "kib1" {
     subnet_id = yandex_vpc_subnet.subnet-1.id
 	security_group_ids = [yandex_vpc_security_group.vm_group_kibana.id]
     nat       = true
+	ip_address = "192.168.10.50"
   }
 
   metadata = {
@@ -145,10 +148,29 @@ resource "yandex_compute_instance" "zab1" {
     subnet_id = yandex_vpc_subnet.subnet-1.id
 	security_group_ids = [yandex_vpc_security_group.vm_group_zabbix.id]
     nat       = true
+	ip_address = "192.168.10.55"
   }
 
   metadata = {
     user-data = "${file("c:/terraform/meta.yaml")}"
+  }
+  connection {
+    type        = "ssh"
+    user        = "artem"
+    private_key = "${file("mysshkey.key")}"
+    host        = "${ yandex_compute_instance.bast1.network_interface.0.nat_ip_address }"
+  }
+  
+  provisioner "file" {
+    source      = "conf/installzabbix.sh"
+    destination = "/home/artem/installzabbix.sh"
+  }
+  
+  provisioner "remote-exec" {
+    inline = [
+	  "sudo chmod +x /home/artem/installzabbix.sh",
+	  "/home/artem/installzabbix.sh"
+	  ]
   }
 }
 
@@ -173,6 +195,7 @@ resource "yandex_compute_instance" "bast1" {
     subnet_id = yandex_vpc_subnet.subnet-1.id
 	security_group_ids = [yandex_vpc_security_group.vm_group_bastion.id]
     nat       = true
+	ip_address = "192.168.10.10"
   }
 
   metadata = {
@@ -198,6 +221,24 @@ resource "yandex_compute_instance" "bast1" {
   provisioner "file" {
     source      = "conf/config"
     destination = "/home/artem/.ssh/config"
+  }
+  
+    connection {
+    type        = "ssh"
+    user        = "artem"
+    private_key = "${file("mysshkey.key")}"
+    host        = "${ yandex_compute_instance.bast1.network_interface.0.nat_ip_address }"
+  }
+  
+  provisioner "file" {
+    source      = "conf/installzabbix.sh"
+    destination = "/home/artem/play-all.sh"
+  }
+  
+  provisioner "remote-exec" {
+    inline = [
+	  "sudo chmod +x /home/artem/play-all.sh"
+	  ]
   }
   
   provisioner "remote-exec" {
