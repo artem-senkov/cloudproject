@@ -3,10 +3,10 @@
 php_modules: [ 'php-curl', 'php-gd', 'php-mbstring', 'php-xml', 'php-xmlrpc', 'php-soap', 'php-intl', 'php-zip' ]
 
 #MySQL Settings
-mysql_root_password: "password"
+mysql_root_password: "Wafqw241wrq$"
 mysql_db: "wordpressDB1"
 mysql_user: "mysqluser"
-mysql_password: "password"
+mysql_password: "Wafqw241wrq$"
 
 #HTTP Settings
 http_host: "itadmin.spb.ru"
