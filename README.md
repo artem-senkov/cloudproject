@@ -75,7 +75,7 @@ connection {
 
 **В проекте использованы роли с просторов интернета, практически все не заработали сходу, адаптированы и скомбинированы под задачу** 
 
-Редактирую host на машине bast1 с ansible
+~~Редактирую host на машине bast1 с ansible~~ Назначил вручную IP адреса, редактировать hosts не требуется
 ```
 [webservers]
 ws1 ansible_ssh_host=192.168.12.21
@@ -253,35 +253,59 @@ ansible-playbook -v -i ~/cloudproject/hosts ~/cloudproject/elk/filebeat-web.yml
 
 4. Установка ZABBIX 6.4 на сервер
 
-Ставлю POSTGRESQL
+Ставлю POSTGRESQL через скрипт для автоматизированой установки после поднятия виртуалки
+
+копирование скрипта на виртуалку и запуск
 ```
+  connection {
+    type        = "ssh"
+    user        = "artem"
+    private_key = "${file("mysshkey.key")}"
+    host        = "${ yandex_compute_instance.bast1.network_interface.0.nat_ip_address }"
+  }
+  
+  provisioner "file" {
+    source      = "conf/installzabbix.sh"
+    destination = "/home/artem/installzabbix.sh"
+  }
+  
+  provisioner "remote-exec" {
+    inline = [
+	  "sudo chmod +x /home/artem/installzabbix.sh",
+	  "/home/artem/installzabbix.sh"
+	  ]
+  }
+```
+
+скрипт
+```
+#!/bin/sh
+# -------------------------------------------------
+# Add repos and install postgres15
+# -------------------------------------------------
 sudo apt -y install gnupg
 sudo sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
 wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 sudo apt update
 sudo apt -y install postgresql-15
-```
-
-Далее по инструкции
-https://www.zabbix.com/download?zabbix=6.4&os_distribution=debian&os_version=11&components=server_frontend_agent&db=pgsql&ws=nginx
-
-```bash
+# -------------------------------------------------
+# Add repos and install zabbix
+# -------------------------------------------------
 sudo wget https://repo.zabbix.com/zabbix/6.4/debian/pool/main/z/zabbix-release/zabbix-release_6.4-1+debian11_all.deb
 sudo dpkg -i zabbix-release_6.4-1+debian11_all.deb
 sudo apt update
-sudo apt install zabbix-server-pgsql zabbix-frontend-php php7.4-pgsql zabbix-nginx-conf zabbix-sql-scripts zabbix-agent
-sudo -u postgres createuser --pwprompt zabbix
+sudo apt -y install zabbix-server-pgsql zabbix-frontend-php php7.4-pgsql zabbix-nginx-conf zabbix-sql-scripts zabbix-agent
+sudo -u postgres psql -c "CREATE USER zabbix WITH PASSWORD 'zabbixDBpassword';"
+#sudo -u postgres createuser --pwprompt zabbix
 sudo -u postgres createdb -O zabbix zabbix
 sudo zcat /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz | sudo -u zabbix psql zabbix
-
-```
-Edit file /etc/zabbix/zabbix_server.conf DBPassword=password
-
-
-Edit file /etc/zabbix/nginx.conf uncomment and set 'listen' and 'server_name' directives.
-```
-sudo systemctl restart zabbix-server zabbix-agent nginx php7.4-fpm
-sudo systemctl enable zabbix-server zabbix-agent nginx php7.4-fpm
+# -------------------------------------------------
+# Edit file /etc/zabbix/zabbix_server.conf DBPassword=password
+# Edit file /etc/zabbix/nginx.conf uncomment and set 'listen' and 'server_name' directives.
+# -------------------------------------------------
+sudo sed -i 's/# DBPassword=/DBPassword=zabbixDBpassword/g' /etc/zabbix/zabbix_server.conf
+sudo sed -i 's/#        listen          8080;/        listen          8080;/g' /etc/zabbix/nginx.conf
+sudo sed -i 's/#        server_name     example.com;/        server_name     myzabbix.net;/g' /etc/zabbix/nginx.conf
 ```
 
 https://www.zabbix.com/documentation/current/en/manual/installation/requirements#default-port-numbers
@@ -317,6 +341,44 @@ ansible-playbook -v -i ~/cloudproject/hosts ~/cloudproject/zabbix-agent.yml
 
 Настроил дашборд для мониторинга основных показателей и доступности webservers
 ![ZABBIX dashboard](https://github.com/artem-senkov/cloudproject/blob/main/img/zabbix_dash1.png)
+
+Скрипт для запуска ролей после развертывания инфраструктуры, прописал запуск в terraform
+
+копирование скрипта на виртуалку и запуск
+```yaml
+    connection {
+    type        = "ssh"
+    user        = "artem"
+    private_key = "${file("mysshkey.key")}"
+    host        = "${ yandex_compute_instance.bast1.network_interface.0.nat_ip_address }"
+  }
+  
+  provisioner "file" {
+    source      = "conf/installzabbix.sh"
+    destination = "/home/artem/play-all.sh"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+	  "sudo chmod +x /home/artem/play-all.sh"
+	  ]
+  }
+```
+скрипт ansible playbooks
+```bash
+#!/bin/sh
+# -------------------------------------------------
+# Play all ansible playbooks
+# -------------------------------------------------
+ansible-playbook -v -i ~/cloudproject/hosts ~/cloudproject/fail2ban/fail2ban.yml > ~/fail2ban.log
+ansible-playbook -v -i ~/cloudproject/hosts ~/cloudproject/wplamp/playbook.yml > ~/wplamp.log
+ansible-playbook -v -i ~/cloudproject/hosts ~/cloudproject/elk/el.yml > ~/el.log
+ansible-playbook -v -i ~/cloudproject/hosts ~/cloudproject/elk/kib7.yml > ~/kib7.log
+ansible-playbook -v -i ~/cloudproject/hosts ~/cloudproject/elk/filebeat-web.yml > ~/filebeat-web.log
+ansible-galaxy collection install zabbix.zabbix > ~/filebeat-web.log > ~/zabbix-agent.log
+ansible-playbook -v -i ~/cloudproject/hosts ~/cloudproject/zabbix-agent.yml > ~/zabbix-agent.log
+```
+
 
 6. Группы безопасности
 
