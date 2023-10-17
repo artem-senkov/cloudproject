@@ -232,14 +232,8 @@ resource "yandex_compute_instance" "bast1" {
   }
   
   provisioner "file" {
-    source      = "conf/installzabbix.sh"
+    source      = "conf/play-all.sh"
     destination = "/home/artem/play-all.sh"
-  }
-  
-  provisioner "remote-exec" {
-    inline = [
-	  "sudo chmod +x /home/artem/play-all.sh"
-	  ]
   }
   
   provisioner "remote-exec" {
@@ -254,6 +248,14 @@ resource "yandex_compute_instance" "bast1" {
 	  "sudo mv /home/artem/ansible.cfg /etc/ansible.cfg"
 	  ]
   }
+  
+  provisioner "remote-exec" {
+    inline = [
+	  "sudo chmod +x /home/artem/play-all.sh"
+	  ]
+  }
+
+  
 }
 
 resource "yandex_alb_target_group" "foo" {
