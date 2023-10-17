@@ -91,6 +91,7 @@ resource "yandex_compute_instance" "elk1" {
     subnet_id = yandex_vpc_subnet.subnet-3.id
 	security_group_ids = [yandex_vpc_security_group.vm_group_elk.id]
     nat       = true
+	ip_address = "192.168.12.51"
   }
 
   metadata = {
