@@ -354,7 +354,7 @@ ansible-playbook -v -i ~/cloudproject/hosts ~/cloudproject/zabbix-agent.yml
   }
   
   provisioner "file" {
-    source      = "conf/installzabbix.sh"
+    source      = "conf/play-all.sh"
     destination = "/home/artem/play-all.sh"
   }
 
