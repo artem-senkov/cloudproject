@@ -224,13 +224,6 @@ resource "yandex_compute_instance" "bast1" {
     destination = "/home/artem/.ssh/config"
   }
   
-    connection {
-    type        = "ssh"
-    user        = "artem"
-    private_key = "${file("mysshkey.key")}"
-    host        = "${ yandex_compute_instance.bast1.network_interface.0.nat_ip_address }"
-  }
-  
   provisioner "file" {
     source      = "conf/play-all.sh"
     destination = "/home/artem/play-all.sh"
